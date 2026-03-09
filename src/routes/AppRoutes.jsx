@@ -12,20 +12,22 @@ import ProtectedRoute from "./ProtectedRoute";
 export default function AppRoutes() {
   return (
     <Routes>
+      {/* Halaman publik */}
       <Route path="/login" element={<Login />} />
 
+      {/* Halaman protected — wajib login */}
       <Route path="/" element={
         <ProtectedRoute>
           <Dashboard />
         </ProtectedRoute>
       } />
 
-      <Route path="/products" element={<ProtectedRoute><Products /></ProtectedRoute>} />
-      <Route path="/categories" element={<ProtectedRoute><Categories /></ProtectedRoute>} />
-      <Route path="/stocks" element={<ProtectedRoute><Stocks /></ProtectedRoute>} />
-      <Route path="/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
+      <Route path="/products"     element={<ProtectedRoute><Products /></ProtectedRoute>} />
+      <Route path="/categories"   element={<ProtectedRoute><Categories /></ProtectedRoute>} />
+      <Route path="/stocks"       element={<ProtectedRoute><Stocks /></ProtectedRoute>} />
+      <Route path="/orders"       element={<ProtectedRoute><Orders /></ProtectedRoute>} />
       <Route path="/transactions" element={<ProtectedRoute><Transactions /></ProtectedRoute>} />
-      <Route path="/users" element={<ProtectedRoute><Users /></ProtectedRoute>} />
+      <Route path="/users"        element={<ProtectedRoute><Users /></ProtectedRoute>} />
     </Routes>
   );
 }

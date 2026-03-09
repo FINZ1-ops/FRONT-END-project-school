@@ -24,7 +24,7 @@ export default function Layout({ children }) {
       // ignore error, tetap logout
     } finally {
       clearAuth();
-      navigate("/login");
+      navigate("/login?manual=true");
     }
   };
 
