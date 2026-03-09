@@ -3,6 +3,10 @@ import { login, register } from "../api/auth.api";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
+// Kode verifikasi khusus untuk mendaftar sebagai kasir
+// Ganti sesuai kebutuhan
+const KODE_KASIR = "KASIR2025";
+
 export default function Login() {
   const [mode, setMode] = useState("login"); // "login" | "register"
 
@@ -13,9 +17,11 @@ export default function Login() {
 
   // State register
   const [regForm, setRegForm] = useState({
-    fullname: "", username: "", email: "", password: "", role: "cashier",
+    fullname: "", username: "", email: "", password: "", role: "user",
   });
-  const [showRegPass, setShowRegPass] = useState(false);
+  const [showRegPass, setShowRegPass]   = useState(false);
+  const [kodeKasir, setKodeKasir]       = useState("");
+  const [showKodeKasir, setShowKodeKasir] = useState(false);
 
   const [error, setError]     = useState("");
   const [success, setSuccess] = useState("");
@@ -28,6 +34,13 @@ export default function Login() {
     setMode(m);
     setError("");
     setSuccess("");
+  };
+
+  // Reset field kode kasir saat role berubah
+  const handleRoleChange = (e) => {
+    setRegForm({ ...regForm, role: e.target.value });
+    setKodeKasir("");
+    setError("");
   };
 
   // ── HANDLE LOGIN ─────────────────────────────────────────────────
@@ -51,11 +64,25 @@ export default function Login() {
     e.preventDefault();
     setError("");
     setSuccess("");
+
+    // Kalau pilih kasir, validasi kode dulu di frontend
+    if (regForm.role === "cashier") {
+      if (!kodeKasir) {
+        setError("Kode verifikasi kasir wajib diisi.");
+        return;
+      }
+      if (kodeKasir !== KODE_KASIR) {
+        setError("Kode verifikasi kasir salah. Hubungi admin.");
+        return;
+      }
+    }
+
     setLoading(true);
     try {
       await register(regForm);
       setSuccess("Akun berhasil dibuat! Silakan login.");
-      setRegForm({ fullname: "", username: "", email: "", password: "", role: "cashier" });
+      setRegForm({ fullname: "", username: "", email: "", password: "", role: "user" });
+      setKodeKasir("");
       setTimeout(() => switchMode("login"), 1500);
     } catch (err) {
       setError(err.response?.data?.message || "Registrasi gagal. Coba lagi.");
@@ -91,7 +118,7 @@ export default function Login() {
           <span className="login-logo-text">FashionStore</span>
         </div>
 
-        {/* Tab Switch — dua tombol sejajar */}
+        {/* Tab Switch */}
         <div className="auth-tabs">
           <button
             className={`auth-tab ${mode === "login" ? "active" : ""}`}
@@ -121,7 +148,7 @@ export default function Login() {
               <input
                 className="form-control"
                 type="email"
-                placeholder="admin@example.com"
+                placeholder="email@example.com"
                 value={loginEmail}
                 onChange={(e) => setLoginEmail(e.target.value)}
                 required
@@ -139,12 +166,8 @@ export default function Login() {
                   onChange={(e) => setLoginPassword(e.target.value)}
                   required
                 />
-                <button
-                  type="button"
-                  className="toggle-password"
-                  onClick={() => setShowLoginPass(!showLoginPass)}
-                  tabIndex={-1}
-                >
+                <button type="button" className="toggle-password"
+                  onClick={() => setShowLoginPass(!showLoginPass)} tabIndex={-1}>
                   {showLoginPass ? <EyeOffIcon /> : <EyeIcon />}
                 </button>
               </div>
@@ -206,28 +229,47 @@ export default function Login() {
                   onChange={(e) => setRegForm({ ...regForm, password: e.target.value })}
                   required
                 />
-                <button
-                  type="button"
-                  className="toggle-password"
-                  onClick={() => setShowRegPass(!showRegPass)}
-                  tabIndex={-1}
-                >
+                <button type="button" className="toggle-password"
+                  onClick={() => setShowRegPass(!showRegPass)} tabIndex={-1}>
                   {showRegPass ? <EyeOffIcon /> : <EyeIcon />}
                 </button>
               </div>
             </div>
 
+            {/* Pilihan Role — tanpa Admin */}
             <div className="form-group">
-              <label>Role</label>
+              <label>Daftar sebagai</label>
               <select
                 className="form-control"
                 value={regForm.role}
-                onChange={(e) => setRegForm({ ...regForm, role: e.target.value })}
+                onChange={handleRoleChange}
               >
-                <option value="cashier">Cashier</option>
-                <option value="admin">Admin</option>
+                <option value="user">User</option>
+                <option value="cashier">Kasir</option>
               </select>
             </div>
+
+            {/* Field kode verifikasi — hanya muncul kalau pilih Kasir */}
+            {regForm.role === "cashier" && (
+              <div className="form-group kode-kasir-wrap">
+                <label>Kode Verifikasi Kasir</label>
+                <div className="input-password-wrap">
+                  <input
+                    className="form-control"
+                    type={showKodeKasir ? "text" : "password"}
+                    placeholder="Masukkan kode dari admin"
+                    value={kodeKasir}
+                    onChange={(e) => setKodeKasir(e.target.value)}
+                    required
+                  />
+                  <button type="button" className="toggle-password"
+                    onClick={() => setShowKodeKasir(!showKodeKasir)} tabIndex={-1}>
+                    {showKodeKasir ? <EyeOffIcon /> : <EyeIcon />}
+                  </button>
+                </div>
+                <p className="kode-hint">Hubungi admin untuk mendapatkan kode verifikasi.</p>
+              </div>
+            )}
 
             <button type="submit" className="login-btn" disabled={loading}>
               {loading ? "Memproses..." : "Daftar Akun"}
