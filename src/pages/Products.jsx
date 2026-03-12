@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { getProducts, createProduct, updateProduct, deleteProduct } from "../api/products.api";
 import Modal from "../components/Modal";
+import { useAuth } from "../context/AuthContext";
 
 const EMPTY_FORM = { name: "", price: "", size: "", color: "", category: "clothing" };
 
@@ -12,6 +13,8 @@ export default function Products() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const { user } = useAuth();
+  const isAdmin = user?.role === "admin";
 
   const fetchData = async () => {
     try {
@@ -64,7 +67,7 @@ const openEdit = (p) => {
           <h1 className="page-title">Products</h1>
           <p className="page-subtitle">{products.length} produk terdaftar</p>
         </div>
-        <button className="btn btn-primary" onClick={openAdd}>+ Tambah Produk</button>
+        {isAdmin && <button className="btn btn-primary" onClick={openAdd}>+ Tambah Produk</button>}
       </div>
 
       <div className="search-bar">
@@ -96,10 +99,12 @@ const openEdit = (p) => {
                       : <span className="badge badge-red">Habis</span>}
                   </td>
                   <td>
-                    <div className="actions">
-                      <button className="btn btn-ghost btn-sm" onClick={() => openEdit(p)}>Edit</button>
-                      <button className="btn btn-danger btn-sm" onClick={() => handleDelete(p.id)}>Hapus</button>
-                    </div>
+                    {isAdmin ? (
+                      <div className="actions">
+                        <button className="btn btn-ghost btn-sm" onClick={() => openEdit(p)}>Edit</button>
+                        <button className="btn btn-danger btn-sm" onClick={() => handleDelete(p.id)}>Hapus</button>
+                      </div>
+                    ) : <span style={{color:"var(--text-muted)"}}>-</span>}
                   </td>
                 </tr>
               ))}

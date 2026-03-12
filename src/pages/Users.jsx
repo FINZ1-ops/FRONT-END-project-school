@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { getUsers, updateUser, deleteUser } from "../api/users.api";
 import Modal from "../components/Modal";
+import { useAuth } from "../context/AuthContext";
 
 export default function Users() {
   const [users, setUsers] = useState([]);
@@ -10,6 +11,8 @@ export default function Users() {
   const [form, setForm] = useState({});
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const { user } = useAuth();
+  const isAdmin = user?.role === "admin";
 
   const fetchData = async () => {
     try {
@@ -80,10 +83,12 @@ export default function Users() {
                         : <span className="badge badge-green">Aktif</span>}
                     </td>
                     <td>
-                      <div className="actions">
-                        <button className="btn btn-ghost btn-sm" onClick={() => openEdit(u)}>Edit</button>
-                        <button className="btn btn-danger btn-sm" onClick={() => handleDelete(u.id)}>Hapus</button>
-                      </div>
+                      {isAdmin ? (
+                        <div className="actions">
+                          <button className="btn btn-ghost btn-sm" onClick={() => openEdit(u)}>Edit</button>
+                          <button className="btn btn-danger btn-sm" onClick={() => handleDelete(u.id)}>Hapus</button>
+                        </div>
+                      ) : <span style={{color:"var(--text-muted)"}}>-</span>}
                     </td>
                   </tr>
                 ))}

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { getCategories, createCategory, updateCategory, deleteCategory } from "../api/categories.api";
 import Modal from "../components/Modal";
+import { useAuth } from "../context/AuthContext";
 
 const EMPTY = { name: "", description: "" };
 
@@ -11,6 +12,8 @@ export default function Categories() {
   const [form, setForm] = useState(EMPTY);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const { user } = useAuth();
+  const isAdmin = user?.role === "admin";
 
   const fetchData = async () => {
     try {
@@ -49,7 +52,7 @@ export default function Categories() {
           <h1 className="page-title">Categories</h1>
           <p className="page-subtitle">{items.length} kategori terdaftar</p>
         </div>
-        <button className="btn btn-primary" onClick={openAdd}>+ Tambah Kategori</button>
+        {isAdmin && <button className="btn btn-primary" onClick={openAdd}>+ Tambah Kategori</button>}
       </div>
 
       <div className="table-wrap">
@@ -65,10 +68,12 @@ export default function Categories() {
                     <td><strong>{c.name}</strong></td>
                     <td style={{ color: "var(--text-muted)" }}>{c.description || "-"}</td>
                     <td>
-                      <div className="actions">
-                        <button className="btn btn-ghost btn-sm" onClick={() => openEdit(c)}>Edit</button>
-                        <button className="btn btn-danger btn-sm" onClick={() => handleDelete(c.id)}>Hapus</button>
-                      </div>
+                      {isAdmin ? (
+                        <div className="actions">
+                          <button className="btn btn-ghost btn-sm" onClick={() => openEdit(c)}>Edit</button>
+                          <button className="btn btn-danger btn-sm" onClick={() => handleDelete(c.id)}>Hapus</button>
+                        </div>
+                      ) : <span style={{color:"var(--text-muted)"}}>-</span>}
                     </td>
                   </tr>
                 ))}

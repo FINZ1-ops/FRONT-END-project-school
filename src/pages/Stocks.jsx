@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { getStocks, createStock } from "../api/stocks.api";
 import Modal from "../components/Modal";
+import { useAuth } from "../context/AuthContext";
 
 const EMPTY = { product_id: "", quantity_change: "", action: "masuk" };
 
@@ -11,6 +12,8 @@ export default function Stocks() {
   const [form, setForm] = useState(EMPTY);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const { user } = useAuth();
+  const canEdit = user?.role === "admin" || user?.role === "cashier";
 
   const fetchData = async () => {
     try {
@@ -42,7 +45,7 @@ export default function Stocks() {
           <h1 className="page-title">Stocks</h1>
           <p className="page-subtitle">Riwayat perubahan stok produk</p>
         </div>
-        <button className="btn btn-primary" onClick={() => { setForm(EMPTY); setError(""); setModal(true); }}>+ Tambah Stok</button>
+        {canEdit && <button className="btn btn-primary" onClick={() => { setForm(EMPTY); setError(""); setModal(true); }}>+ Tambah Stok</button>}
       </div>
 
       <div className="table-wrap">
